@@ -36,8 +36,31 @@ const Battle = (() => {
     document.getElementById('battle-player-name').textContent =
       state.save.player === 'philip' ? 'Philip' : 'Owen';
     updatePlayerStats();
+    // Pets
+    renderPets();
     // Spells
     renderSpellGrid();
+  }
+
+  function renderPets() {
+    const container = document.getElementById('battle-pets');
+    if (!container) return;
+    container.innerHTML = '';
+    const owned = getOwnedPets(state.save);
+    owned.forEach(pet => {
+      const div = document.createElement('div');
+      div.className = 'battle-pet';
+      div.title = pet.name + ': ' + pet.desc;
+      div.dataset.petId = pet.id;
+      div.innerHTML = getSprite(pet.sprite);
+      container.appendChild(div);
+    });
+  }
+
+  // Shorthand: sum bonus across owned pets for a given effect type
+  function petEffect(type) {
+    if (typeof petEffectFor !== 'function') return 0;
+    return petEffectFor(state.save, type);
   }
 
   function updateEnemyHp() {
@@ -136,6 +159,9 @@ const Battle = (() => {
     state.save.stats[correct ? 'correct' : 'wrong']++;
     state.save.mp = Math.max(0, state.save.mp - spell.mpCost);
     if (correct) {
+      // Reward correct answers with a small MP regen so the player never softlocks.
+      const regen = 3 + petEffect('mpRegen');
+      state.save.mp = Math.min(state.save.maxMp, state.save.mp + regen);
       Audio.correct();
       castSpell(spell, true);
     } else {
@@ -163,19 +189,46 @@ const Battle = (() => {
 
     // Damage spell — slight delay so cast animation reads
     setTimeout(() => {
-      const dmg = spell.damage + Math.floor(Math.random() * 6); // small random
+      const bonus = petEffect('bonus');     // Storm Wolf: +8 to spells
+      const dmg = spell.damage + bonus + Math.floor(Math.random() * 6); // small random
       state.enemy.currentHp = Math.max(0, state.enemy.currentHp - dmg);
       Audio.enemyHit();
       document.getElementById('enemy-sprite').classList.add('hit');
       setTimeout(() => document.getElementById('enemy-sprite').classList.remove('hit'), 400);
       floatText(`-${dmg}`, 'damage', getEnemyCenter());
-      flashFeedback('Hit!', `${spell.name} dealt ${dmg} damage`, 'good');
+      const bonusNote = bonus > 0 ? ` (+${bonus} pet bonus)` : '';
+      flashFeedback('Hit!', `${spell.name} dealt ${dmg} damage${bonusNote}`, 'good');
       updateEnemyHp();
 
-      if (state.enemy.currentHp <= 0) {
-        setTimeout(() => victory(), 900);
+      // Pets that auto-attack each round
+      const petAtk = petEffect('attack');
+      const petHeal = petEffect('heal');
+      if (petAtk > 0 && state.enemy.currentHp > 0) {
+        setTimeout(() => {
+          state.enemy.currentHp = Math.max(0, state.enemy.currentHp - petAtk);
+          document.getElementById('enemy-sprite').classList.add('hit');
+          setTimeout(() => document.getElementById('enemy-sprite').classList.remove('hit'), 400);
+          floatText(`-${petAtk} 🔥`, 'damage', getEnemyCenter());
+          Audio.enemyHit();
+          updateEnemyHp();
+        }, 600);
+      }
+      if (petHeal > 0 && state.save.hp < state.save.maxHp) {
+        setTimeout(() => {
+          const healed = Math.min(petHeal, state.save.maxHp - state.save.hp);
+          state.save.hp += healed;
+          floatText(`+${healed} ♥`, 'heal', getPlayerCenter());
+          updatePlayerStats();
+        }, 800);
+      }
+
+      if (state.enemy.currentHp <= 0 || (petAtk > 0 && state.enemy.currentHp - petAtk <= 0)) {
+        setTimeout(() => {
+          if (state.enemy.currentHp <= 0) victory();
+          else enemyAttack();
+        }, 1200);
       } else {
-        setTimeout(() => enemyAttack(), 900);
+        setTimeout(() => enemyAttack(), 1200);
       }
     }, 300);
   }
@@ -259,12 +312,21 @@ const Battle = (() => {
     // Island clear?
     const islandJustCleared = isIslandCleared(state.island, state.save)
       && !state.save.clearedIslands.includes(state.island.id);
+    let petUnlocked = null;
     if (islandJustCleared) {
       state.save.clearedIslands.push(state.island.id);
       // Unlock corresponding spell
       const spell = SPELLS.find(s => s.unlockedBy === state.island.subject);
       if (spell && !state.save.spellsKnown.includes(spell.id)) {
         state.save.spellsKnown.push(spell.id);
+      }
+      // Unlock corresponding pet
+      const pet = (typeof PETS !== 'undefined')
+        ? PETS.find(p => p.unlockedBy === state.island.subject)
+        : null;
+      if (pet && !state.save.pets.includes(pet.id)) {
+        state.save.pets.push(pet.id);
+        petUnlocked = pet;
       }
     }
     persistSave(state.save);
@@ -277,6 +339,7 @@ const Battle = (() => {
         spellUnlocked: islandJustCleared
           ? SPELLS.find(s => s.unlockedBy === state.island.subject)
           : null,
+        petUnlocked,
         enemy,
         gameComplete: enemy.final,
       });

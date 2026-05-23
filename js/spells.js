@@ -11,10 +11,10 @@ const SPELLS = [
     id: 'spark',
     name: 'Spark',
     icon: '✨',
-    mpCost: 5,
-    damage: 15,
+    mpCost: 0,
+    damage: 12,
     subject: 'any',
-    desc: 'A small magical spark. Costs 5 MP.',
+    desc: 'Basic attack — always free. 12 damage.',
     unlockedFromStart: true,
   },
   {

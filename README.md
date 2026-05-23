@@ -10,9 +10,16 @@ A custom learning RPG built for Philip (1st grade) and Owen (4th grade). Prodigy
   - Spelling Swamp — sight words, homophones, suffixes
   - Grammar Grove — parts of speech, tenses, punctuation
   - Dark Citadel — Final boss: Dark Philip (unlocks after all islands cleared)
+- **Walkable world map** — move your wizard with arrow keys, WASD, on-screen D-pad, or tap-to-walk. Walk onto an island to enter it.
+- **Pet companions** — 4 pets unlocked by defeating island bosses, each with a unique passive effect in battle:
+  - 🐲 Pyro Drake (Math) — auto-attacks for +10 damage per round
+  - 🦉 Wise Owl (Reading) — restores +5 extra MP per correct answer
+  - 🐸 Toxic Toad (Spelling) — heals you +4 HP each round
+  - 🐺 Storm Wolf (Grammar) — adds +8 damage to every spell
 - **Two player profiles**, each with their own saved progress (localStorage)
 - **Grade-aware questions** — Philip gets 1st-grade questions, Owen gets 4th-grade
 - **7 unlockable spells** earned by clearing islands
+- **No MP softlock** — Spark is always free (0 MP), and correct answers restore MP
 - **Synthesized sound effects** (Web Audio API — no audio files to load)
 - **PWA-installable** — add to Chromebook/tablet home screen
 - **Pure HTML/CSS/JS** — no build step, no framework, no dependencies
@@ -31,9 +38,10 @@ philip-g/
 │   ├── characters.js    # All SVG character & background sprites
 │   ├── questions.js     # Question bank (edit freely)
 │   ├── spells.js        # Spell definitions
+│   ├── pets.js          # Pet definitions & effect resolver
 │   ├── islands.js       # Island & enemy definitions
 │   ├── battle.js        # Turn-based battle engine
-│   └── game.js          # Main controller, screens, navigation
+│   └── game.js          # Main controller, screens, walker, navigation
 ├── assets/
 │   └── favicon.svg
 ├── Photos/              # ⛔ gitignored — never commit kids' real photos

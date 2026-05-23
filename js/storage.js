@@ -19,6 +19,8 @@ function defaultSave(player) {
     defeatedEnemies: [],            // enemy ids
     clearedIslands: [],             // island ids (subjects: math/reading/spelling/grammar/boss)
     spellsKnown: ['spark', 'fireball', 'heal'],
+    pets: [],                       // pet ids owned (each unlocked by clearing a boss)
+    playerPos: { x: 50, y: 50 },    // % position on world map
     stats: { correct: 0, wrong: 0, battles: 0 },
     updatedAt: Date.now(),
   };

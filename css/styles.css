@@ -280,6 +280,91 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 }
 .map-hint { margin: 0; font-size: 14px; }
 
+/* ===== Walker (the player avatar on the world map) ===== */
+.map-walker {
+  position: absolute;
+  width: 70px; height: 88px;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  pointer-events: none;
+  transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1), top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 4px 4px rgba(0,0,0,0.4));
+}
+.map-walker svg { width: 100%; height: 100%; }
+.map-walker.bobbing {
+  animation: walkBob 0.3s ease-in-out;
+}
+@keyframes walkBob {
+  0%, 100% { transform: translate(-50%, -50%) translateY(0); }
+  50% { transform: translate(-50%, -50%) translateY(-6px); }
+}
+.map-walker.facing-left svg { transform: scaleX(-1); }
+
+/* Island highlighted when walker is close enough */
+.map-island.near {
+  animation: nearPulse 1s ease-in-out infinite alternate;
+}
+@keyframes nearPulse {
+  from { transform: translate(-50%, -50%) scale(1); }
+  to   { transform: translate(-50%, -55%) scale(1.08); filter: drop-shadow(0 0 16px var(--gold)); }
+}
+
+/* Floating prompt that appears when player is on an island */
+.map-prompt {
+  position: absolute;
+  z-index: 4;
+  background: var(--gold);
+  color: var(--purple-900);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-family: var(--font-display);
+  font-size: 14px;
+  border: 3px solid var(--purple-800);
+  box-shadow: var(--shadow-md);
+  transform: translate(-50%, -50%);
+  animation: promptBob 0.6s ease-in-out infinite alternate;
+  cursor: pointer;
+  pointer-events: auto;
+}
+@keyframes promptBob {
+  from { transform: translate(-50%, -50%) translateY(0); }
+  to   { transform: translate(-50%, -50%) translateY(-4px); }
+}
+
+/* Touch D-pad — only shows where most useful (mobile/tablet) */
+.map-controls {
+  position: absolute;
+  bottom: 56px;
+  right: 16px;
+  display: grid;
+  grid-template-columns: 50px 50px 50px;
+  grid-template-rows: 50px 50px 50px;
+  gap: 4px;
+  z-index: 5;
+}
+.dpad {
+  background: rgba(0,0,0,0.55);
+  color: #fff;
+  border: 2px solid var(--gold);
+  border-radius: 12px;
+  font-size: 20px;
+  display: flex; align-items: center; justify-content: center;
+  user-select: none;
+  -webkit-touch-callout: none;
+  transition: background 0.1s ease, transform 0.08s ease;
+}
+.dpad:active { background: var(--gold); color: var(--purple-900); transform: scale(0.92); }
+.dpad.up    { grid-column: 2; grid-row: 1; }
+.dpad.left  { grid-column: 1; grid-row: 2; }
+.dpad.right { grid-column: 3; grid-row: 2; }
+.dpad.down  { grid-column: 2; grid-row: 3; }
+
+/* Hide D-pad on big screens — they have keyboards */
+@media (min-width: 1024px) and (hover: hover) and (pointer: fine) {
+  .map-controls { display: none; }
+}
+
 /* =====================================================
    Island Screen
    ===================================================== */
@@ -402,7 +487,23 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
   display: flex; align-items: center; justify-content: center;
   gap: 16px;
   padding: 8px 16px;
+  flex-wrap: wrap;
 }
+
+/* Active pets sit beside the wizard during battle */
+.battle-pets {
+  display: flex; align-items: flex-end; gap: 4px;
+}
+.battle-pet {
+  width: 64px; height: 64px;
+  animation: petBob 2s ease-in-out infinite alternate;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+}
+.battle-pet svg { width: 100%; height: 100%; }
+.battle-pet:nth-child(2) { animation-delay: 0.3s; }
+.battle-pet:nth-child(3) { animation-delay: 0.6s; }
+.battle-pet:nth-child(4) { animation-delay: 0.9s; }
+@keyframes petBob { from { transform: translateY(0); } to { transform: translateY(-6px); } }
 .player-sprite { width: 140px; height: 140px; }
 .player-sprite svg { width: 100%; height: 100%; }
 .player-sprite.cast { animation: cast 0.6s ease; }
@@ -634,6 +735,18 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
   overflow-y: auto;
   display: flex; flex-direction: column; gap: 12px;
 }
+.spellbook-section-header {
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 20px;
+  color: var(--purple-800);
+  text-align: center;
+  margin-top: 8px;
+  padding: 6px 0;
+  border-bottom: 2px solid var(--purple-500);
+}
+.spellbook-section-header:first-child { margin-top: 0; }
+
 .spellbook-entry {
   background: rgba(255,255,255,0.6);
   border: 2px solid var(--purple-500);
@@ -641,6 +754,13 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
   padding: 12px;
   display: flex; align-items: center; gap: 12px;
 }
+.pet-entry .pet-icon-sprite {
+  width: 56px; height: 56px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+.pet-entry .pet-icon-sprite svg { width: 100%; height: 100%; }
+.pet-entry .big-lock { font-size: 36px; }
 .spellbook-entry.locked { opacity: 0.5; border-style: dashed; }
 .spellbook-entry .icon { font-size: 36px; line-height: 1; }
 .spellbook-entry .info { flex: 1; }

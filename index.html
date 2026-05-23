@@ -56,14 +56,22 @@
         <button class="icon-btn" id="spellbook-btn" aria-label="Open spellbook">&#128214;</button>
       </header>
 
-      <div class="map-canvas">
+      <div class="map-canvas" id="map-canvas">
         <div class="map-ocean" aria-hidden="true"></div>
         <div class="map-islands" id="map-islands"></div>
-        <div class="map-tooltip" id="map-tooltip" hidden></div>
+        <div class="map-walker" id="map-walker" aria-label="You"></div>
+        <div class="map-prompt" id="map-prompt" hidden></div>
+      </div>
+
+      <div class="map-controls" id="map-controls" aria-label="Movement controls">
+        <button class="dpad up" data-dir="up" aria-label="Walk up">▲</button>
+        <button class="dpad left" data-dir="left" aria-label="Walk left">◀</button>
+        <button class="dpad right" data-dir="right" aria-label="Walk right">▶</button>
+        <button class="dpad down" data-dir="down" aria-label="Walk down">▼</button>
       </div>
 
       <div class="map-footer">
-        <p class="map-hint">Tap an island to set sail. Defeat all enemies to claim it!</p>
+        <p class="map-hint">Use ▲▼◀▶ or arrow keys / WASD to walk. Tap an island to sail there!</p>
       </div>
     </section>
 
@@ -108,6 +116,7 @@
           <div class="mp-bar"><div class="mp-fill" id="player-mp-fill"></div></div>
           <div class="mp-text"><span id="player-mp-text">30/30</span> MP</div>
         </div>
+        <div class="battle-pets" id="battle-pets" aria-label="Active pets"></div>
       </div>
 
       <!-- Question / Spell Panel -->
@@ -162,6 +171,7 @@
   <script src="js/characters.js"></script>
   <script src="js/questions.js"></script>
   <script src="js/spells.js"></script>
+  <script src="js/pets.js"></script>
   <script src="js/islands.js"></script>
   <script src="js/battle.js"></script>
   <script src="js/game.js"></script>
