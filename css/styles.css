@@ -31,7 +31,7 @@
 html, body {
   margin: 0; padding: 0;
   height: 100%; width: 100%;
-  overflow: hidden;
+  overflow: hidden;          /* outer page locked; individual screens scroll internally */
   font-family: var(--font-body);
   color: var(--ink);
   background: var(--purple-900);
@@ -54,6 +54,10 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
   position: absolute; inset: 0;
   display: none; flex-direction: column;
   background: var(--purple-900);
+  overflow-y: auto;                    /* per-screen scroll when content > viewport */
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;   /* smooth iOS momentum */
+  overscroll-behavior: contain;        /* don't bounce parent */
 }
 .screen.active { display: flex; }
 
@@ -61,9 +65,13 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
    Player Select
    ===================================================== */
 #screen-player-select {
-  align-items: center; justify-content: center;
+  /* Anchor top so it scrolls naturally on short screens; min-height + auto margins
+     keep it visually centered when content fits within the viewport. */
+  align-items: center;
+  justify-content: flex-start;
   background: linear-gradient(180deg, #1e1b4b 0%, #5b21b6 50%, #7c3aed 100%);
   position: relative;
+  padding: 24px 0;
 }
 .title-bg {
   position: absolute; inset: 0;
@@ -87,6 +95,7 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
   text-align: center;
   padding: 24px;
   max-width: 760px; width: 100%;
+  margin: auto;                /* visually center within available space */
 }
 .game-title {
   font-family: var(--font-display);
@@ -316,9 +325,11 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
    ===================================================== */
 #screen-battle {
   background: #1e1b4b;
+  min-height: 100%;            /* ensures flex children stack and scroll cleanly */
 }
 .battle-bg {
   position: absolute; inset: 0; z-index: 0;
+  min-height: 100vh;           /* keeps backdrop covering even when content scrolls */
 }
 .battle-bg::before {
   content: ''; position: absolute; inset: 0;
@@ -420,6 +431,9 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
+  /* On short screens, the panel itself becomes a scroll container so spells/answers
+     are always reachable without losing the enemy/player sprites at the top. */
+  max-height: none;
 }
 .panel-stage { display: none; flex-direction: column; gap: 12px; flex: 1; }
 .panel-stage.active { display: flex; }
@@ -556,14 +570,17 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
    Result Screen
    ===================================================== */
 #screen-result {
-  align-items: center; justify-content: center;
+  align-items: center;
+  justify-content: flex-start;
   background: radial-gradient(circle at center, #5b21b6, #1e1b4b);
+  padding: 24px 0;
 }
 .result-wrap {
   text-align: center;
   color: #fff;
   padding: 24px;
   max-width: 500px;
+  margin: auto;            /* center if it fits, scroll if it doesn't */
 }
 #result-title {
   font-family: var(--font-display);
@@ -646,3 +663,35 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
   .question-text { min-height: 80px; }
   .battle-panel { min-height: 240px; }
 }
+
+/* =====================================================
+   Short viewports (landscape phones, small Chromebooks)
+   Shrink the heaviest elements so the battle screen
+   doesn't require scrolling on common sizes.
+   ===================================================== */
+@media (max-height: 640px) {
+  .enemy-sprite { width: 110px; height: 110px; }
+  .player-sprite { width: 100px; height: 100px; }
+  .battle-enemy { padding: 12px 12px 4px; }
+  .battle-player { padding: 4px 12px; }
+  .battle-panel { padding: 12px; min-height: 160px; }
+  .answer-btn { padding: 12px 8px; font-size: 18px; min-height: 50px; }
+  .spell-btn { min-height: 70px; padding: 8px 6px; }
+  .spell-icon { font-size: 24px; }
+  .question-text { min-height: 40px; font-size: clamp(18px, 4vw, 24px); }
+  .feedback-text { font-size: clamp(24px, 6vw, 36px); }
+  .top-bar { padding: 8px 12px; }
+  .icon-btn { width: 40px; height: 40px; }
+}
+
+/* Tiny phones in portrait */
+@media (max-width: 360px) {
+  .game-title { font-size: 48px; }
+  .player-avatar { width: 110px; height: 110px; }
+  .player-card { padding: 16px 12px; }
+  .spell-grid { grid-template-columns: 1fr 1fr; }
+}
+
+/* Make the spellbook modal always scroll its body */
+.spellbook-list { max-height: calc(80vh - 60px); }
+
