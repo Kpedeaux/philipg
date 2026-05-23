@@ -172,29 +172,34 @@ const Battle = (() => {
   }
 
   function castSpell(spell, hitTrue) {
-    document.getElementById('battle-player-sprite').classList.add('cast');
-    setTimeout(() => document.getElementById('battle-player-sprite').classList.remove('cast'), 600);
+    const playerEl = document.getElementById('battle-player-sprite');
+    const enemyEl  = document.getElementById('enemy-sprite');
+    playerEl.classList.add('cast');
+    setTimeout(() => playerEl.classList.remove('cast'), 600);
     Audio.spellCast();
 
     if (spell.heal) {
       const healed = Math.min(spell.heal, state.save.maxHp - state.save.hp);
-      state.save.hp += healed;
-      Audio.heal();
-      floatText(`+${healed} HP`, 'heal', getPlayerCenter());
-      flashFeedback('Healed!', `+${healed} HP restored`, 'good');
-      updatePlayerStats();
-      setTimeout(() => enemyTurnOrNext(), 1000);
+      // Heal projectile pulses on the player
+      Effects.castSpell(spell.id, playerEl, playerEl, () => {
+        state.save.hp += healed;
+        Audio.heal();
+        floatText(`+${healed} HP`, 'heal', getPlayerCenter());
+        flashFeedback('Healed!', `+${healed} HP restored`, 'good');
+        updatePlayerStats();
+        setTimeout(() => enemyTurnOrNext(), 700);
+      });
       return;
     }
 
-    // Damage spell — slight delay so cast animation reads
-    setTimeout(() => {
+    // Damage spell — launch projectile, then apply damage when it lands
+    Effects.castSpell(spell.id, playerEl, enemyEl, () => {
       const bonus = petEffect('bonus');     // Storm Wolf: +8 to spells
-      const dmg = spell.damage + bonus + Math.floor(Math.random() * 6); // small random
+      const dmg = spell.damage + bonus + Math.floor(Math.random() * 6);
       state.enemy.currentHp = Math.max(0, state.enemy.currentHp - dmg);
       Audio.enemyHit();
-      document.getElementById('enemy-sprite').classList.add('hit');
-      setTimeout(() => document.getElementById('enemy-sprite').classList.remove('hit'), 400);
+      enemyEl.classList.add('hit');
+      setTimeout(() => enemyEl.classList.remove('hit'), 400);
       floatText(`-${dmg}`, 'damage', getEnemyCenter());
       const bonusNote = bonus > 0 ? ` (+${bonus} pet bonus)` : '';
       flashFeedback('Hit!', `${spell.name} dealt ${dmg} damage${bonusNote}`, 'good');
@@ -230,25 +235,30 @@ const Battle = (() => {
       } else {
         setTimeout(() => enemyAttack(), 1200);
       }
-    }, 300);
+    });
   }
 
   function enemyAttack() {
+    const playerEl = document.getElementById('battle-player-sprite');
+    const enemyEl  = document.getElementById('enemy-sprite');
     const base = state.enemy.dmg;
     const dmg = base + Math.floor(Math.random() * 4);
-    state.save.hp = Math.max(0, state.save.hp - dmg);
-    Audio.hit();
-    document.getElementById('battle-player-sprite').classList.add('hit');
-    setTimeout(() => document.getElementById('battle-player-sprite').classList.remove('hit'), 400);
-    floatText(`-${dmg}`, 'damage', getPlayerCenter());
-    flashFeedback(`${state.enemy.name} attacks!`, `-${dmg} HP`, 'bad');
-    updatePlayerStats();
 
-    if (state.save.hp <= 0) {
-      setTimeout(() => defeat(), 900);
-    } else {
-      setTimeout(() => enemyTurnOrNext(), 1000);
-    }
+    // Use full dramatic attack sequence (windup → lunge → slash → impact)
+    Effects.enemyAttack(enemyEl, playerEl, () => {
+      state.save.hp = Math.max(0, state.save.hp - dmg);
+      Audio.hit();
+      floatText(`-${dmg}`, 'damage', getPlayerCenter());
+      flashFeedback(`${state.enemy.name} attacks!`, `-${dmg} HP`, 'bad');
+      updatePlayerStats();
+
+      // Defeat check must run AFTER HP is decremented (inside the callback)
+      if (state.save.hp <= 0) {
+        setTimeout(() => defeat(), 900);
+      } else {
+        setTimeout(() => enemyTurnOrNext(), 1000);
+      }
+    });
   }
 
   function enemyTurnOrNext() {
@@ -294,7 +304,9 @@ const Battle = (() => {
 
   function victory() {
     Audio.victory();
-    document.getElementById('enemy-sprite').classList.add('defeated');
+    const enemyEl = document.getElementById('enemy-sprite');
+    Effects.defeatBurst(enemyEl);
+    enemyEl.classList.add('defeated');
 
     // Reward
     const enemy = state.enemy;

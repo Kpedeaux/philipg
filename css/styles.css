@@ -662,6 +662,281 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
   pointer-events: none;
   z-index: 10;
 }
+
+/* =====================================================
+   Battle FX Layer — projectiles, particles, slashes
+   ===================================================== */
+.battle-fx-layer {
+  position: fixed; inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  overflow: hidden;
+}
+.battle-fx-layer > * { position: absolute; }
+
+/* Wind-up glow at caster position */
+.fx-windup {
+  width: 80px; height: 80px;
+  margin: -40px 0 0 -40px;
+  border-radius: 50%;
+  background: radial-gradient(circle, currentColor 0%, transparent 70%);
+  animation: fxWindup 0.4s ease-out;
+  filter: blur(2px);
+}
+@keyframes fxWindup {
+  from { transform: scale(0.3); opacity: 0; }
+  60%  { transform: scale(1.1); opacity: 1; }
+  to   { transform: scale(1.4); opacity: 0; }
+}
+
+/* Projectile traveling from caster to target */
+.fx-projectile {
+  font-size: 44px;
+  margin: -22px 0 0 -22px;
+  filter: drop-shadow(0 0 12px currentColor);
+  will-change: transform;
+  text-shadow: 0 0 20px currentColor;
+}
+
+/* Arc trajectory (Spark, Fireball) */
+.traj-arc {
+  animation: trajArc 0.5s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+}
+@keyframes trajArc {
+  0%   { transform: translate(0,0) rotate(0deg) scale(0.6); }
+  50%  { transform: translate(calc(var(--dx) * 0.5), calc(var(--dy) * 0.5 - 60px)) rotate(180deg) scale(1.1); }
+  100% { transform: translate(var(--dx), var(--dy)) rotate(360deg) scale(1); }
+}
+
+/* Sweep trajectory (Tidal Wave) — straight horizontal sweep */
+.traj-sweep {
+  font-size: 80px;
+  margin: -40px 0 0 -40px;
+  animation: trajSweep 0.5s ease-out forwards;
+}
+@keyframes trajSweep {
+  from { transform: translate(0,0) scaleX(0.3); opacity: 0.4; }
+  to   { transform: translate(var(--dx), var(--dy)) scaleX(1.6); opacity: 1; }
+}
+
+/* Swirl trajectory (Leaf Storm) — spiraling */
+.traj-swirl {
+  animation: trajSwirl 0.55s ease-in-out forwards;
+}
+@keyframes trajSwirl {
+  0%   { transform: translate(0,0) rotate(0deg) scale(0.5); }
+  50%  { transform: translate(calc(var(--dx) * 0.5 + 40px), calc(var(--dy) * 0.5 - 30px)) rotate(540deg) scale(1); }
+  100% { transform: translate(var(--dx), var(--dy)) rotate(1080deg) scale(1.2); }
+}
+
+/* Strike trajectory (Thunder) — fast straight bolt */
+.traj-strike {
+  font-size: 56px;
+  margin: -28px 0 0 -28px;
+  animation: trajStrike 0.3s ease-in forwards;
+}
+@keyframes trajStrike {
+  from { transform: translate(0,0) scale(0.4); opacity: 0; }
+  20%  { opacity: 1; }
+  to   { transform: translate(var(--dx), var(--dy)) scale(1.3); opacity: 1; }
+}
+
+/* Crash trajectory (Meteor) — falling from sky */
+.traj-crash {
+  font-size: 72px;
+  margin: -36px 0 0 -36px;
+  animation: trajCrash 0.7s cubic-bezier(0.5, 0, 0.75, 0) forwards;
+}
+@keyframes trajCrash {
+  0%   { transform: translate(calc(var(--dx) * 0.5), -400px) rotate(0deg) scale(0.4); opacity: 0; }
+  20%  { opacity: 1; }
+  100% { transform: translate(var(--dx), var(--dy)) rotate(720deg) scale(1.4); opacity: 1; }
+}
+
+/* Self-target (Heal) — pulses on the player */
+.traj-self {
+  animation: trajSelf 0.6s ease-out forwards;
+}
+@keyframes trajSelf {
+  0%   { transform: scale(0.3); opacity: 0; }
+  40%  { transform: scale(1.4); opacity: 1; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+
+/* Particles flying outward from impact */
+.fx-particle {
+  font-size: 28px;
+  margin: -14px 0 0 -14px;
+  filter: drop-shadow(0 0 4px currentColor);
+  animation: particleBurst 0.8s ease-out forwards;
+}
+@keyframes particleBurst {
+  0%   { transform: translate(0,0) scale(0.6) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--px), var(--py)) scale(1.2) rotate(360deg); opacity: 0; }
+}
+.fx-particle-victory {
+  font-size: 32px;
+  animation: particleVictory 1.2s ease-out forwards;
+}
+@keyframes particleVictory {
+  0%   { transform: translate(0,0) scale(0.3); opacity: 1; }
+  40%  { opacity: 1; }
+  100% { transform: translate(var(--px), var(--py)) scale(1.6) rotate(720deg); opacity: 0; }
+}
+
+/* Impact bursts — each spell type has its own */
+.fx-impact-sparkle, .fx-impact-explode, .fx-impact-splash, .fx-impact-burst,
+.fx-impact-shock, .fx-impact-crater, .fx-impact-glow {
+  width: 120px; height: 120px;
+  margin: -60px 0 0 -60px;
+  border-radius: 50%;
+  background: radial-gradient(circle, currentColor 0%, transparent 70%);
+  animation: impactRipple 0.6s ease-out;
+}
+.fx-impact-explode {
+  background: radial-gradient(circle, #fde047 0%, #f97316 30%, transparent 70%);
+  animation: impactExplode 0.6s ease-out;
+}
+.fx-impact-crater {
+  width: 180px; height: 180px;
+  margin: -90px 0 0 -90px;
+  background: radial-gradient(circle, #fde047 0%, #dc2626 30%, transparent 70%);
+  animation: impactExplode 0.7s ease-out;
+}
+.fx-impact-shock {
+  background: radial-gradient(circle, #fde047 0%, #facc15 40%, transparent 70%);
+  animation: impactShock 0.6s ease-out;
+}
+.fx-impact-splash {
+  background: radial-gradient(circle, #bfdbfe 0%, #3b82f6 30%, transparent 70%);
+  animation: impactRipple 0.6s ease-out;
+}
+.fx-impact-glow {
+  background: radial-gradient(circle, #bbf7d0 0%, #22c55e 40%, transparent 70%);
+  animation: impactGlow 0.8s ease-out;
+}
+@keyframes impactRipple {
+  from { transform: scale(0.2); opacity: 1; }
+  to   { transform: scale(1.6); opacity: 0; }
+}
+@keyframes impactExplode {
+  0%   { transform: scale(0.2); opacity: 1; }
+  40%  { transform: scale(1.3); opacity: 1; filter: brightness(1.5); }
+  100% { transform: scale(2); opacity: 0; }
+}
+@keyframes impactShock {
+  0%, 30%, 60% { transform: scale(1.2); opacity: 1; filter: brightness(2); }
+  15%, 45%, 100% { transform: scale(1.6); opacity: 0.4; filter: brightness(1); }
+}
+@keyframes impactGlow {
+  from { transform: scale(0.4); opacity: 0; }
+  40%  { transform: scale(1.2); opacity: 0.9; }
+  to   { transform: scale(1.8); opacity: 0; }
+}
+
+/* Lightning bolt from sky on thunder spell */
+.fx-lightning {
+  width: 12px;
+  height: 100vh;
+  top: 0;
+  margin-left: -6px;
+  background: linear-gradient(180deg, transparent 0%, #fde047 30%, #fff 70%, #fde047 100%);
+  box-shadow: 0 0 30px #fde047, 0 0 60px #fde047;
+  animation: lightningFlash 0.35s ease-out;
+  clip-path: polygon(50% 0, 100% 30%, 40% 40%, 80% 60%, 30% 70%, 70% 100%, 50% 100%, 0% 70%, 60% 60%, 20% 40%, 80% 30%);
+}
+@keyframes lightningFlash {
+  0%, 100% { opacity: 0; }
+  10%, 30%, 50% { opacity: 1; }
+  20%, 40%      { opacity: 0.3; }
+}
+
+/* Slash mark for enemy attacks */
+.fx-slash {
+  width: 140px; height: 14px;
+  margin: -7px 0 0 -70px;
+  background: linear-gradient(90deg, transparent 0%, #fff 20%, #ef4444 50%, #fff 80%, transparent 100%);
+  border-radius: 999px;
+  filter: drop-shadow(0 0 10px #ef4444);
+  animation: slashSweep 0.4s ease-out;
+}
+@keyframes slashSweep {
+  0%   { transform: rotate(-45deg) scaleX(0); opacity: 1; }
+  40%  { transform: rotate(-45deg) scaleX(1.2); opacity: 1; }
+  100% { transform: rotate(-45deg) scaleX(1); opacity: 0; }
+}
+
+.fx-hit-ring {
+  width: 100px; height: 100px;
+  margin: -50px 0 0 -50px;
+  border: 4px solid currentColor;
+  border-radius: 50%;
+  animation: hitRing 0.5s ease-out;
+  box-shadow: 0 0 20px currentColor;
+}
+@keyframes hitRing {
+  from { transform: scale(0.3); opacity: 1; }
+  to   { transform: scale(1.8); opacity: 0; }
+}
+
+/* Full-screen color flash */
+.fx-hitflash {
+  position: fixed; inset: 0;
+  opacity: 0.4;
+  animation: hitFlashFade 0.22s ease-out;
+  pointer-events: none;
+}
+@keyframes hitFlashFade {
+  from { opacity: 0.5; }
+  to   { opacity: 0; }
+}
+
+/* Enemy wind-up: grows + tints */
+.fx-enemy-windup {
+  animation: enemyWindup 0.28s ease-in !important;
+}
+@keyframes enemyWindup {
+  0%   { transform: scale(1); filter: none; }
+  100% { transform: scale(1.15) translateY(-8px); filter: brightness(1.4) drop-shadow(0 0 12px #ef4444); }
+}
+
+/* Enemy lunge: zips forward then snaps back */
+.fx-enemy-lunge {
+  animation: enemyLunge 0.25s cubic-bezier(0.6, 0, 0.4, 1) !important;
+}
+@keyframes enemyLunge {
+  0%   { transform: scale(1.15) translateY(0); }
+  50%  { transform: scale(1.2) translateY(60px); filter: brightness(1.4); }
+  100% { transform: scale(1) translateY(0); filter: none; }
+}
+
+/* Player stagger after being hit */
+.fx-player-stagger {
+  animation: playerStagger 0.5s ease-out !important;
+}
+@keyframes playerStagger {
+  0%   { transform: rotate(0deg) translateX(0); }
+  20%  { transform: rotate(-12deg) translateX(-16px); filter: brightness(0.7); }
+  40%  { transform: rotate(8deg)  translateX(8px); }
+  60%  { transform: rotate(-4deg) translateX(-4px); }
+  100% { transform: rotate(0deg) translateX(0); filter: none; }
+}
+
+/* Screen shake — applied to #screen-battle */
+.fx-shake {
+  animation: screenShake 0.4s cubic-bezier(0.4, 0, 0.6, 1);
+}
+@keyframes screenShake {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(calc(var(--shake-px) * -1), calc(var(--shake-px) * 0.5)); }
+  20% { transform: translate(calc(var(--shake-px) *  1), calc(var(--shake-px) * -0.5)); }
+  30% { transform: translate(calc(var(--shake-px) * -0.8), calc(var(--shake-px) * 0.3)); }
+  40% { transform: translate(calc(var(--shake-px) *  0.8), calc(var(--shake-px) * -0.3)); }
+  50% { transform: translate(calc(var(--shake-px) * -0.5), calc(var(--shake-px) * 0.2)); }
+  60% { transform: translate(calc(var(--shake-px) *  0.5), 0); }
+  70% { transform: translate(calc(var(--shake-px) * -0.3), 0); }
+  80% { transform: translate(calc(var(--shake-px) *  0.2), 0); }
+}
 .floating-text {
   position: absolute;
   font-family: var(--font-display);
