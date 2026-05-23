@@ -321,24 +321,25 @@ const Battle = (() => {
     // Level up?
     const leveledUp = checkLevelUp(state.save);
 
-    // Island clear?
-    const islandJustCleared = isIslandCleared(state.island, state.save)
-      && !state.save.clearedIslands.includes(state.island.id);
+    // Wild pet defeated? Add it to the player's team immediately
     let petUnlocked = null;
-    if (islandJustCleared) {
-      state.save.clearedIslands.push(state.island.id);
-      // Unlock corresponding spell
-      const spell = SPELLS.find(s => s.unlockedBy === state.island.subject);
-      if (spell && !state.save.spellsKnown.includes(spell.id)) {
-        state.save.spellsKnown.push(spell.id);
-      }
-      // Unlock corresponding pet
-      const pet = (typeof PETS !== 'undefined')
-        ? PETS.find(p => p.unlockedBy === state.island.subject)
-        : null;
+    if (enemy.wildPet && typeof PETS !== 'undefined') {
+      const pet = PETS.find(p => p.id === enemy.wildPet);
       if (pet && !state.save.pets.includes(pet.id)) {
         state.save.pets.push(pet.id);
         petUnlocked = pet;
+      }
+    }
+
+    // Island clear?
+    const islandJustCleared = isIslandCleared(state.island, state.save)
+      && !state.save.clearedIslands.includes(state.island.id);
+    if (islandJustCleared) {
+      state.save.clearedIslands.push(state.island.id);
+      // Unlock corresponding spell (kept tied to clearing the island = beating the boss)
+      const spell = SPELLS.find(s => s.unlockedBy === state.island.subject);
+      if (spell && !state.save.spellsKnown.includes(spell.id)) {
+        state.save.spellsKnown.push(spell.id);
       }
     }
     persistSave(state.save);

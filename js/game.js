@@ -183,34 +183,84 @@ const Game = (() => {
     document.getElementById('island-hp').textContent = `${currentSave.hp}/${currentSave.maxHp}`;
     document.getElementById('island-mp').textContent = `${currentSave.mp}/${currentSave.maxMp}`;
     document.getElementById('island-bg').innerHTML = getSprite(currentIsland.bg);
+
     const container = document.getElementById('island-enemies');
     container.innerHTML = '';
+
     currentIsland.enemies.forEach(enemy => {
       const defeated = currentSave.defeatedEnemies.includes(enemy.id);
+      const locked   = isEnemyLocked(enemy, currentSave);
+      const pos      = enemy.pos || { x: 50, y: 50 };
+
       const el = document.createElement('div');
-      el.className = 'island-enemy' + (defeated ? ' defeated' : '') + (enemy.boss ? ' boss' : '');
+      let cls = 'island-enemy';
+      if (defeated) cls += ' defeated';
+      if (locked)   cls += ' locked';
+      if (enemy.boss) cls += ' boss';
+      if (enemy.wildPet) cls += ' wild-pet';
+      el.className = cls;
+      el.dataset.enemyId = enemy.id;
+      el.style.left = pos.x + '%';
+      el.style.top  = pos.y + '%';
+
+      let badge = '';
+      if (enemy.boss)     badge = ' 👑';
+      else if (enemy.wildPet) badge = ' 🌿';
+
       el.innerHTML = `
         ${getSprite(enemy.sprite)}
-        <div class="enemy-label">${enemy.name}${enemy.boss ? ' 👑' : ''}</div>
-        <div class="enemy-hp-mini">${defeated ? '✓ Defeated' : `HP ${enemy.hp}`}</div>
+        <div class="enemy-label">${enemy.name}${badge}</div>
       `;
-      if (!defeated) {
+
+      if (!defeated && !locked) {
         el.addEventListener('click', () => {
           Audio.click();
-          startBattle(enemy);
+          // Walk toward the enemy, then start battle
+          IslandWalker.walkTo(pos.x, pos.y, () => startBattle(enemy));
+        });
+      } else if (locked) {
+        // Tapping locked boss flashes the hint
+        el.style.pointerEvents = 'auto';
+        el.style.cursor = 'help';
+        el.addEventListener('click', () => {
+          Audio.wrong();
+          flashIslandHint('🔒 Defeat the wild pet to unlock the boss!');
         });
       }
       container.appendChild(el);
     });
 
+    // Position walker and start input listeners
+    IslandWalker.mount();
+
     // Hint
+    updateIslandHint();
+  }
+
+  function updateIslandHint() {
     const allDefeated = currentIsland.enemies.every(e => currentSave.defeatedEnemies.includes(e.id));
     const hintEl = document.getElementById('island-hint');
     if (allDefeated) {
       hintEl.textContent = '🏆 Island Cleared! Head back to the map.';
     } else {
-      hintEl.textContent = 'Tap an enemy to battle!';
+      const wildPet = currentIsland.enemies.find(e => e.wildPet && !currentSave.defeatedEnemies.includes(e.id));
+      if (wildPet) {
+        hintEl.textContent = `🌿 A wild ${wildPet.name.replace('Wild ', '')} roams here. Defeat it to add it to your team!`;
+      } else {
+        hintEl.textContent = 'Walk to an enemy to battle!';
+      }
     }
+  }
+
+  function flashIslandHint(msg) {
+    const hintEl = document.getElementById('island-hint');
+    const old = hintEl.textContent;
+    hintEl.textContent = msg;
+    hintEl.parentElement.classList.add('shake');
+    setTimeout(() => {
+      hintEl.textContent = old;
+      hintEl.parentElement.classList.remove('shake');
+    }, 2200);
   }
 
   // ---------- Battle ----------
@@ -318,6 +368,8 @@ const Game = (() => {
     init,
     _enterIsland: enterIslandFromWalker,
     _syncSave: syncSave,
+    _currentIsland: () => currentIsland,
+    _startBattleFromIsland: (enemy) => startBattle(enemy),
   };
 })();
 
@@ -545,4 +597,227 @@ function enterIsland(islandId) {
   Audio.click();
   Game._enterIsland(island);
 }
+
+// =====================================================
+// IslandWalker — same idea as Walker but for the island canvas.
+// Walks around an island, triggers battle when close to an enemy.
+// =====================================================
+const IslandWalker = (() => {
+  const STEP = 4;
+  const ENTER_THRESHOLD = 10;   // % distance to show prompt
+  const AUTO_FIGHT      = 5;    // % distance to auto-trigger battle
+  let walkerEl = null;
+  let promptEl = null;
+  let canvasEl = null;
+  let keys = {};
+  let raf = null;
+  let initialized = false;
+  let facingLeft = false;
+  let nearEnemyId = null;
+  let pos = { x: 50, y: 92 };  // starts at bottom-center each visit
+
+  function init() {
+    if (initialized) return;
+    initialized = true;
+    walkerEl = document.getElementById('island-walker');
+    promptEl = document.getElementById('island-prompt');
+    canvasEl = document.getElementById('island-canvas');
+
+    document.addEventListener('keydown', onKeydown);
+    document.addEventListener('keyup',   onKeyup);
+
+    document.querySelectorAll('[data-island-dir]').forEach(btn => {
+      const dir = btn.dataset.islandDir;
+      const start = (e) => { e.preventDefault(); keys[dir] = true; ensureLoop(); };
+      const end   = (e) => { e.preventDefault(); keys[dir] = false; };
+      btn.addEventListener('pointerdown', start);
+      btn.addEventListener('pointerup', end);
+      btn.addEventListener('pointercancel', end);
+      btn.addEventListener('pointerleave', end);
+    });
+
+    promptEl.addEventListener('click', () => {
+      if (nearEnemyId) triggerEnemyBattle(nearEnemyId);
+    });
+  }
+
+  function mount() {
+    init();
+    pos = { x: 50, y: 92 };   // reset to bottom on each island entry
+    const save = Game._save;
+    const sprite = save && save.player === 'philip' ? 'walkPhilip' : 'walkOwen';
+    walkerEl.innerHTML = getSprite(sprite);
+    walkerEl.style.left = pos.x + '%';
+    walkerEl.style.top  = pos.y + '%';
+    nearEnemyId = null;
+    promptEl.hidden = true;
+    checkProximity();
+  }
+
+  function onKeydown(e) {
+    if (!isIslandActive()) return;
+    const mapped = mapKey(e.key);
+    if (!mapped) return;
+    e.preventDefault();
+    keys[mapped] = true;
+    ensureLoop();
+    if (e.key === 'Enter' || e.key === ' ') {
+      if (nearEnemyId) triggerEnemyBattle(nearEnemyId);
+    }
+  }
+  function onKeyup(e) {
+    const mapped = mapKey(e.key);
+    if (mapped) keys[mapped] = false;
+  }
+  function mapKey(k) {
+    const lower = (k || '').toLowerCase();
+    if (lower === 'arrowup'    || lower === 'w') return 'up';
+    if (lower === 'arrowdown'  || lower === 's') return 'down';
+    if (lower === 'arrowleft'  || lower === 'a') return 'left';
+    if (lower === 'arrowright' || lower === 'd') return 'right';
+    return null;
+  }
+  function isIslandActive() {
+    const el = document.getElementById('screen-island');
+    return el && el.classList.contains('active');
+  }
+
+  function ensureLoop() {
+    if (raf) return;
+    let last = performance.now();
+    const tick = (now) => {
+      const dt = Math.min((now - last) / 16.67, 2);
+      last = now;
+      const anyKey = keys.up || keys.down || keys.left || keys.right;
+      if (anyKey && isIslandActive()) {
+        let dx = 0, dy = 0;
+        if (keys.up)    dy -= STEP * dt;
+        if (keys.down)  dy += STEP * dt;
+        if (keys.left)  { dx -= STEP * dt; facingLeft = true; }
+        if (keys.right) { dx += STEP * dt; facingLeft = false; }
+        if (dx !== 0 && dy !== 0) { dx *= 0.707; dy *= 0.707; }
+        pos = {
+          x: clamp(pos.x + dx, 6, 94),
+          y: clamp(pos.y + dy, 8, 94),
+        };
+        walkerEl.style.left = pos.x + '%';
+        walkerEl.style.top  = pos.y + '%';
+        walkerEl.classList.toggle('facing-left', facingLeft);
+        if (!walkerEl.classList.contains('bobbing')) {
+          walkerEl.classList.add('bobbing');
+          setTimeout(() => walkerEl.classList.remove('bobbing'), 300);
+        }
+        checkProximity();
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+  }
+
+  function checkProximity() {
+    const save = Game._save;
+    if (!save) return;
+    let nearestId = null;
+    let nearestDist = Infinity;
+    let nearestEnemy = null;
+
+    document.querySelectorAll('.island-enemy').forEach(el => {
+      const id = el.dataset.enemyId;
+      const enemy = Game._currentIsland().enemies.find(e => e.id === id);
+      if (!enemy) return;
+      const isDefeated = save.defeatedEnemies.includes(id);
+      const isLocked   = isEnemyLocked(enemy, save);
+      if (isDefeated) { el.classList.remove('near'); return; }
+
+      const ep = enemy.pos || { x: 50, y: 50 };
+      const dist = Math.hypot(ep.x - pos.x, ep.y - pos.y);
+      const near = dist < ENTER_THRESHOLD;
+      el.classList.toggle('near', near && !isLocked);
+
+      if (near && dist < nearestDist) {
+        nearestDist = dist;
+        nearestId = id;
+        nearestEnemy = enemy;
+      }
+
+      // Auto-trigger battle if VERY close to a non-locked enemy
+      if (!isLocked && dist < AUTO_FIGHT) {
+        triggerEnemyBattle(id);
+      }
+    });
+
+    nearEnemyId = nearestId;
+    if (nearestEnemy) {
+      const ep = nearestEnemy.pos;
+      const isLocked = isEnemyLocked(nearestEnemy, save);
+      promptEl.hidden = false;
+      promptEl.style.left = ep.x + '%';
+      promptEl.style.top  = (ep.y - 12) + '%';
+      promptEl.className = 'island-prompt';
+      if (isLocked) {
+        promptEl.classList.add('locked-prompt');
+        promptEl.innerHTML = `🔒 Locked`;
+      } else if (nearestEnemy.boss) {
+        promptEl.classList.add('boss-prompt');
+        promptEl.innerHTML = `⚔️ Fight ${nearestEnemy.name}!`;
+      } else if (nearestEnemy.wildPet) {
+        promptEl.classList.add('pet-prompt');
+        promptEl.innerHTML = `🌿 Tame ${nearestEnemy.name}!`;
+      } else {
+        promptEl.innerHTML = `⚔️ Fight ${nearestEnemy.name}`;
+      }
+    } else {
+      promptEl.hidden = true;
+    }
+  }
+
+  // Auto-walk toward a target, then fire callback
+  function walkTo(targetX, targetY, onArrive) {
+    clearInterval(IslandWalker._auto);
+    let i = 0;
+    const steps = 30;
+    IslandWalker._auto = setInterval(() => {
+      i++;
+      const dx = targetX - pos.x;
+      const dy = targetY - pos.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist < AUTO_FIGHT || i > steps) {
+        clearInterval(IslandWalker._auto);
+        IslandWalker._auto = null;
+        checkProximity();
+        if (onArrive) onArrive();
+        return;
+      }
+      facingLeft = dx < 0;
+      const step = Math.min(dist, 5);
+      pos = {
+        x: clamp(pos.x + (dx / dist) * step, 6, 94),
+        y: clamp(pos.y + (dy / dist) * step, 8, 94),
+      };
+      walkerEl.style.left = pos.x + '%';
+      walkerEl.style.top  = pos.y + '%';
+      walkerEl.classList.toggle('facing-left', facingLeft);
+      walkerEl.classList.add('bobbing');
+      setTimeout(() => walkerEl.classList.remove('bobbing'), 250);
+      checkProximity();
+    }, 120);
+  }
+
+  function triggerEnemyBattle(enemyId) {
+    clearInterval(IslandWalker._auto);
+    keys = {};                                   // stop movement
+    const island = Game._currentIsland();
+    const enemy = island.enemies.find(e => e.id === enemyId);
+    if (!enemy) return;
+    if (isEnemyLocked(enemy, Game._save)) return;
+    promptEl.hidden = true;
+    nearEnemyId = null;
+    Audio.click();
+    Game._startBattleFromIsland(enemy);
+  }
+
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+  return { init, mount, walkTo };
+})();
 

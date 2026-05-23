@@ -72,17 +72,15 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 /* =====================================================
    Player Select
    ===================================================== */
-#screen-player-select {
-  /* Anchor top so it scrolls naturally on short screens; min-height + auto margins
-     keep it visually centered when content fits within the viewport. */
-  align-items: center;
-  justify-content: flex-start;
+/* Override the flex layout from .screen.active — block layout always scrolls cleanly */
+#screen-player-select.active {
+  display: block;
   background: linear-gradient(180deg, #1e1b4b 0%, #5b21b6 50%, #7c3aed 100%);
   position: relative;
-  padding: 24px 0;
 }
 .title-bg {
-  position: absolute; inset: 0;
+  /* Fixed positioning so the bg never participates in layout/scroll calculations */
+  position: fixed; inset: 0;
   background:
     radial-gradient(2px 2px at 20% 20%, #fff8 50%, transparent 60%),
     radial-gradient(2px 2px at 80% 30%, #fff6 50%, transparent 60%),
@@ -95,15 +93,23 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
   opacity: 0.6;
   animation: twinkle 4s ease-in-out infinite alternate;
   pointer-events: none;
+  z-index: 0;
 }
 @keyframes twinkle { from { opacity: 0.3; } to { opacity: 0.9; } }
 
 .title-wrap {
+  /* min-height: 100vh fills viewport AND grows with content (scrolls when taller) */
   position: relative; z-index: 1;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;     /* vertical center when content fits */
   text-align: center;
-  padding: 24px;
-  max-width: 760px; width: 100%;
-  margin: auto;                /* visually center within available space */
+  padding: 24px 16px;
+  max-width: 800px;
+  margin: 0 auto;              /* horizontal center only */
+  box-sizing: border-box;
 }
 .game-title {
   font-family: var(--font-display);
@@ -376,17 +382,140 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 /* =====================================================
    Island Screen
    ===================================================== */
-.island-bg { position: absolute; inset: 56px 0 40px 0; z-index: 0; }
-.island-bg svg { width: 100%; height: 100%; }
-.island-enemies {
-  position: relative; z-index: 1;
-  flex: 0 0 auto;        /* don't shrink — let content overflow into screen's scroll */
-  display: flex;
-  align-items: center; justify-content: center;
-  gap: 24px; padding: 16px;
-  flex-wrap: wrap;
-  min-height: 60vh;      /* take up reasonable space when there's room */
+/* ===== Island canvas (walkable scene) ===== */
+.island-canvas {
+  position: relative;
+  flex: 1 0 auto;
+  min-height: 60vh;
+  overflow: hidden;
+  background: #0c4a6e;
 }
+.island-bg {
+  position: absolute; inset: 0; z-index: 0;
+}
+.island-bg svg { width: 100%; height: 100%; display: block; }
+
+.island-enemies {
+  position: absolute; inset: 0; z-index: 1;
+}
+
+.island-enemy {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  width: 120px;
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.15s ease;
+  filter: drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+}
+.island-enemy svg { width: 90px; height: 90px; }
+.island-enemy .enemy-label {
+  display: inline-block;
+  background: rgba(15, 23, 42, 0.85);
+  color: #fff;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 12px;
+  margin-top: 2px;
+  border: 2px solid var(--gold);
+  white-space: nowrap;
+}
+.island-enemy.boss .enemy-label {
+  border-color: var(--red);
+  background: rgba(127, 29, 29, 0.9);
+}
+.island-enemy.wild-pet .enemy-label {
+  border-color: #22c55e;
+  background: rgba(20, 83, 45, 0.9);
+}
+.island-enemy.wild-pet svg {
+  animation: wildBob 1.8s ease-in-out infinite alternate;
+}
+@keyframes wildBob {
+  from { transform: translateY(0); }
+  to   { transform: translateY(-6px); }
+}
+.island-enemy.boss svg {
+  animation: bossLoom 2.5s ease-in-out infinite alternate;
+}
+@keyframes bossLoom {
+  from { transform: scale(1); }
+  to   { transform: scale(1.06); }
+}
+.island-enemy.defeated {
+  opacity: 0.25;
+  pointer-events: none;
+  filter: grayscale(1);
+}
+
+/* Locked boss (wild pet not yet defeated) */
+.island-enemy.locked {
+  pointer-events: none;
+}
+.island-enemy.locked::after {
+  content: '🔒';
+  position: absolute;
+  top: -8px; right: -8px;
+  font-size: 28px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+}
+.island-enemy.locked svg {
+  filter: grayscale(0.6) brightness(0.7);
+  animation: none;
+}
+.island-enemy.locked .enemy-label {
+  opacity: 0.7;
+}
+
+/* Enemy highlights when player is close */
+.island-enemy.near {
+  filter: drop-shadow(0 0 20px var(--gold)) drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+  transform: translate(-50%, -55%) scale(1.1);
+}
+.island-enemy.near.wild-pet {
+  filter: drop-shadow(0 0 20px #22c55e) drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+}
+.island-enemy.near.boss {
+  filter: drop-shadow(0 0 24px var(--red)) drop-shadow(0 4px 6px rgba(0,0,0,0.4));
+}
+
+/* ===== Island walker (player avatar on the island) ===== */
+.island-walker {
+  position: absolute;
+  width: 70px; height: 88px;
+  transform: translate(-50%, -50%);
+  z-index: 3;
+  pointer-events: none;
+  transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1), top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: drop-shadow(0 4px 4px rgba(0,0,0,0.5));
+}
+.island-walker svg { width: 100%; height: 100%; }
+.island-walker.bobbing { animation: walkBob 0.3s ease-in-out; }
+.island-walker.facing-left svg { transform: scaleX(-1); }
+
+/* Floating prompt above an enemy when player is close */
+.island-prompt {
+  position: absolute;
+  z-index: 4;
+  background: var(--gold);
+  color: var(--purple-900);
+  padding: 8px 16px;
+  border-radius: 999px;
+  font-weight: 900;
+  font-family: var(--font-display);
+  font-size: 14px;
+  border: 3px solid var(--purple-800);
+  box-shadow: var(--shadow-md);
+  transform: translate(-50%, -50%);
+  animation: promptBob 0.6s ease-in-out infinite alternate;
+  cursor: pointer;
+  pointer-events: auto;
+  white-space: nowrap;
+}
+.island-prompt.boss-prompt { background: var(--red); color: #fff; border-color: #fef2f2; }
+.island-prompt.pet-prompt  { background: #22c55e; color: #052e16; border-color: #bbf7d0; }
+.island-prompt.locked-prompt { background: #6b7280; color: #fff; border-color: #1f2937; animation: none; cursor: not-allowed; }
 .island-enemy {
   background: rgba(0,0,0,0.4);
   border: 3px solid var(--gold);
@@ -957,18 +1086,23 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 /* =====================================================
    Result Screen
    ===================================================== */
-#screen-result {
-  align-items: center;
-  justify-content: flex-start;
+#screen-result.active {
+  display: block;
   background: radial-gradient(circle at center, #5b21b6, #1e1b4b);
-  padding: 24px 0;
 }
 .result-wrap {
+  /* Same bulletproof pattern: min-height viewport + inner flex centering */
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   text-align: center;
   color: #fff;
-  padding: 24px;
-  max-width: 500px;
-  margin: auto;            /* center if it fits, scroll if it doesn't */
+  padding: 24px 16px;
+  max-width: 600px;
+  margin: 0 auto;
+  box-sizing: border-box;
 }
 #result-title {
   font-family: var(--font-display);

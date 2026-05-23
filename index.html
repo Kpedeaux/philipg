@@ -88,10 +88,23 @@
         </div>
         <button class="icon-btn" id="island-spellbook-btn" aria-label="Open spellbook">&#128214;</button>
       </header>
-      <div class="island-bg" id="island-bg"></div>
-      <div class="island-enemies" id="island-enemies"></div>
+
+      <div class="island-canvas" id="island-canvas">
+        <div class="island-bg" id="island-bg"></div>
+        <div class="island-enemies" id="island-enemies"></div>
+        <div class="island-walker" id="island-walker" aria-label="You"></div>
+        <div class="island-prompt" id="island-prompt" hidden></div>
+      </div>
+
+      <div class="map-controls" id="island-controls" aria-label="Movement controls">
+        <button class="dpad up" data-island-dir="up" aria-label="Walk up">▲</button>
+        <button class="dpad left" data-island-dir="left" aria-label="Walk left">◀</button>
+        <button class="dpad right" data-island-dir="right" aria-label="Walk right">▶</button>
+        <button class="dpad down" data-island-dir="down" aria-label="Walk down">▼</button>
+      </div>
+
       <div class="map-footer">
-        <p class="map-hint" id="island-hint">Tap an enemy to battle!</p>
+        <p class="map-hint" id="island-hint">Walk around to find enemies and wild pets!</p>
       </div>
     </section>
 
