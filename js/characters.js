@@ -887,6 +887,171 @@ const CHARACTERS = {
       <rect x="78" y="96" width="6" height="14" fill="#6b7280" stroke="#1f2937" stroke-width="1.5"/>
     </svg>
   `,
+
+  // ============================================================
+  // Tier-2 pets — found on the advanced islands
+  // ============================================================
+
+  // Crystal Fox — shields the wizard from incoming damage
+  petCrystalFox: `
+    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="60" cy="108" rx="32" ry="5" fill="#000" opacity="0.3"/>
+      <!-- tail (fluffy with crystal tip) -->
+      <path d="M 90 90 Q 110 80, 115 60 Q 108 76, 100 88 Z" fill="#ea580c" stroke="#7c2d12" stroke-width="2"/>
+      <path d="M 113 62 L 117 56 L 119 64 Z" fill="#fde68a"/>
+      <!-- body -->
+      <ellipse cx="60" cy="78" rx="30" ry="22" fill="#f97316" stroke="#7c2d12" stroke-width="2.5"/>
+      <ellipse cx="60" cy="84" rx="20" ry="14" fill="#fef3c7"/>
+      <!-- head -->
+      <ellipse cx="60" cy="52" rx="22" ry="20" fill="#fb923c" stroke="#7c2d12" stroke-width="2.5"/>
+      <!-- white face mask -->
+      <path d="M 48 56 Q 60 70, 72 56 L 70 62 Q 60 70, 50 62 Z" fill="#fef3c7"/>
+      <!-- ears (pointed) -->
+      <polygon points="42,36 36,18 50,32" fill="#fb923c" stroke="#7c2d12" stroke-width="2"/>
+      <polygon points="78,36 84,18 70,32" fill="#fb923c" stroke="#7c2d12" stroke-width="2"/>
+      <polygon points="44,30 40,22 48,30" fill="#fef3c7"/>
+      <polygon points="76,30 80,22 72,30" fill="#fef3c7"/>
+      <!-- crystal on forehead -->
+      <polygon points="60,30 56,40 60,46 64,40" fill="#60a5fa" stroke="#1e40af" stroke-width="1.5"/>
+      <polygon points="60,30 58,36 60,40 62,36" fill="#bfdbfe"/>
+      <!-- eyes -->
+      <circle cx="50" cy="50" r="4" fill="#fff"/>
+      <circle cx="50" cy="52" r="2" fill="#1e293b"/>
+      <circle cx="70" cy="50" r="4" fill="#fff"/>
+      <circle cx="70" cy="52" r="2" fill="#1e293b"/>
+      <!-- snout -->
+      <ellipse cx="60" cy="62" rx="6" ry="4" fill="#fef3c7"/>
+      <ellipse cx="60" cy="61" rx="2" ry="1.5" fill="#1e293b"/>
+      <!-- mouth -->
+      <path d="M 56 66 Q 60 70, 64 66" fill="none" stroke="#7c2d12" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- legs -->
+      <rect x="42" y="92" width="6" height="14" rx="2" fill="#ea580c" stroke="#7c2d12" stroke-width="1.5"/>
+      <rect x="72" y="92" width="6" height="14" rx="2" fill="#ea580c" stroke="#7c2d12" stroke-width="1.5"/>
+      <!-- crystal shield aura -->
+      <circle cx="60" cy="65" r="50" fill="none" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.5"/>
+    </svg>
+  `,
+
+  // Aurora Phoenix — rare chance for critical strikes
+  petPhoenix: `
+    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="60" cy="108" rx="28" ry="5" fill="#000" opacity="0.3"/>
+      <!-- flame aura behind -->
+      <path d="M 20 80 Q 15 50, 30 35 Q 28 55, 35 70 Z" fill="#fbbf24" opacity="0.6"/>
+      <path d="M 100 80 Q 105 50, 90 35 Q 92 55, 85 70 Z" fill="#fbbf24" opacity="0.6"/>
+      <!-- tail feathers (long, flowing) -->
+      <path d="M 60 95 Q 50 110, 35 105 L 40 95 Z" fill="#dc2626" stroke="#7f1d1d" stroke-width="1.5"/>
+      <path d="M 60 95 Q 70 110, 85 105 L 80 95 Z" fill="#dc2626" stroke="#7f1d1d" stroke-width="1.5"/>
+      <path d="M 60 95 Q 60 115, 60 118 L 65 105 L 55 105 Z" fill="#f97316" stroke="#7c2d12" stroke-width="1.5"/>
+      <!-- body -->
+      <ellipse cx="60" cy="72" rx="22" ry="26" fill="#dc2626" stroke="#7f1d1d" stroke-width="2.5"/>
+      <ellipse cx="60" cy="78" rx="14" ry="18" fill="#f97316"/>
+      <ellipse cx="60" cy="84" rx="9" ry="12" fill="#fde047"/>
+      <!-- wings -->
+      <path d="M 36 70 Q 14 60, 12 40 Q 28 55, 40 70 Z" fill="#dc2626" stroke="#7f1d1d" stroke-width="2"/>
+      <path d="M 84 70 Q 106 60, 108 40 Q 92 55, 80 70 Z" fill="#dc2626" stroke="#7f1d1d" stroke-width="2"/>
+      <!-- inner wing color -->
+      <path d="M 36 70 Q 22 62, 22 50 Q 32 60, 40 70 Z" fill="#f97316"/>
+      <path d="M 84 70 Q 98 62, 98 50 Q 88 60, 80 70 Z" fill="#f97316"/>
+      <!-- head crest -->
+      <polygon points="60,30 52,12 60,22 68,12" fill="#f97316" stroke="#7c2d12" stroke-width="1.5"/>
+      <polygon points="60,28 56,16 60,20 64,16" fill="#fde047"/>
+      <!-- head -->
+      <circle cx="60" cy="46" r="14" fill="#ef4444" stroke="#7f1d1d" stroke-width="2"/>
+      <!-- eyes -->
+      <circle cx="54" cy="44" r="4" fill="#fff"/>
+      <circle cx="54" cy="46" r="2" fill="#fde047"/>
+      <circle cx="54" cy="46" r="1" fill="#0f172a"/>
+      <circle cx="66" cy="44" r="4" fill="#fff"/>
+      <circle cx="66" cy="46" r="2" fill="#fde047"/>
+      <circle cx="66" cy="46" r="1" fill="#0f172a"/>
+      <!-- beak -->
+      <polygon points="60,52 56,60 64,60" fill="#fbbf24" stroke="#7c2d12" stroke-width="1.2"/>
+    </svg>
+  `,
+
+  // Spectral Cat — extra healing per round
+  petSpectralCat: `
+    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="60" cy="110" rx="26" ry="4" fill="#000" opacity="0.2"/>
+      <!-- ghostly trail -->
+      <path d="M 36 90 Q 30 100, 38 108 Q 42 100, 36 90 Z" fill="#e9d5ff" opacity="0.6"/>
+      <path d="M 84 90 Q 90 100, 82 108 Q 78 100, 84 90 Z" fill="#e9d5ff" opacity="0.6"/>
+      <!-- body (translucent purple-white) -->
+      <ellipse cx="60" cy="80" rx="30" ry="24" fill="#e9d5ff" stroke="#7c3aed" stroke-width="2" opacity="0.92"/>
+      <!-- chest -->
+      <ellipse cx="60" cy="86" rx="18" ry="14" fill="#f3e8ff" opacity="0.9"/>
+      <!-- head -->
+      <ellipse cx="60" cy="52" rx="22" ry="20" fill="#f3e8ff" stroke="#7c3aed" stroke-width="2" opacity="0.95"/>
+      <!-- ears (pointed cat ears) -->
+      <polygon points="42,38 38,18 50,34" fill="#e9d5ff" stroke="#7c3aed" stroke-width="2"/>
+      <polygon points="78,38 82,18 70,34" fill="#e9d5ff" stroke="#7c3aed" stroke-width="2"/>
+      <polygon points="44,32 41,22 47,32" fill="#fbcfe8"/>
+      <polygon points="76,32 79,22 73,32" fill="#fbcfe8"/>
+      <!-- glowing eyes -->
+      <circle cx="50" cy="50" r="5" fill="#fff"/>
+      <ellipse cx="50" cy="52" rx="2" ry="3" fill="#7c3aed"/>
+      <circle cx="50" cy="51" r="1" fill="#fff"/>
+      <circle cx="70" cy="50" r="5" fill="#fff"/>
+      <ellipse cx="70" cy="52" rx="2" ry="3" fill="#7c3aed"/>
+      <circle cx="70" cy="51" r="1" fill="#fff"/>
+      <!-- nose -->
+      <polygon points="60,60 56,64 64,64" fill="#fbcfe8" stroke="#7c3aed" stroke-width="1"/>
+      <!-- mouth -->
+      <path d="M 54 68 Q 60 72, 66 68" fill="none" stroke="#7c3aed" stroke-width="1.5" stroke-linecap="round"/>
+      <!-- whiskers -->
+      <line x1="38" y1="60" x2="48" y2="62" stroke="#7c3aed" stroke-width="1"/>
+      <line x1="82" y1="60" x2="72" y2="62" stroke="#7c3aed" stroke-width="1"/>
+      <line x1="38" y1="66" x2="48" y2="66" stroke="#7c3aed" stroke-width="1"/>
+      <line x1="82" y1="66" x2="72" y2="66" stroke="#7c3aed" stroke-width="1"/>
+      <!-- swirl tail -->
+      <path d="M 85 85 Q 105 80, 105 60 Q 100 75, 90 80" fill="#e9d5ff" stroke="#7c3aed" stroke-width="2" opacity="0.9"/>
+      <!-- sparkles -->
+      <text x="25" y="50" font-size="10" fill="#fde047">✨</text>
+      <text x="90" y="40" font-size="10" fill="#fde047">✨</text>
+      <text x="100" y="80" font-size="10" fill="#fde047">✨</text>
+    </svg>
+  `,
+
+  // Ice Wolf — heavy auto-attack per round
+  petIceWolf: `
+    <svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="60" cy="108" rx="32" ry="5" fill="#000" opacity="0.3"/>
+      <!-- body -->
+      <ellipse cx="60" cy="82" rx="34" ry="22" fill="#bfdbfe" stroke="#1e40af" stroke-width="2.5"/>
+      <!-- back ice crystals -->
+      <polygon points="46,64 42,52 50,60" fill="#dbeafe" stroke="#1e40af" stroke-width="1.5"/>
+      <polygon points="60,60 55,46 65,46 70,60" fill="#dbeafe" stroke="#1e40af" stroke-width="1.5"/>
+      <polygon points="74,64 78,52 70,60" fill="#dbeafe" stroke="#1e40af" stroke-width="1.5"/>
+      <!-- head -->
+      <ellipse cx="60" cy="56" rx="24" ry="22" fill="#dbeafe" stroke="#1e40af" stroke-width="2.5"/>
+      <!-- ears -->
+      <polygon points="42,40 36,20 50,36" fill="#dbeafe" stroke="#1e40af" stroke-width="2"/>
+      <polygon points="78,40 84,20 70,36" fill="#dbeafe" stroke="#1e40af" stroke-width="2"/>
+      <polygon points="44,34 40,26 46,34" fill="#60a5fa"/>
+      <polygon points="76,34 80,26 74,34" fill="#60a5fa"/>
+      <!-- snout -->
+      <ellipse cx="60" cy="68" rx="14" ry="10" fill="#f0f9ff"/>
+      <ellipse cx="60" cy="64" rx="3" ry="2" fill="#1e293b"/>
+      <!-- glowing icy blue eyes -->
+      <circle cx="50" cy="52" r="4.5" fill="#fff"/>
+      <circle cx="50" cy="54" r="2.5" fill="#3b82f6"/>
+      <circle cx="50" cy="53" r="1.2" fill="#fff"/>
+      <circle cx="70" cy="52" r="4.5" fill="#fff"/>
+      <circle cx="70" cy="54" r="2.5" fill="#3b82f6"/>
+      <circle cx="70" cy="53" r="1.2" fill="#fff"/>
+      <!-- fangs -->
+      <polygon points="56,72 58,78 60,72" fill="#fff" stroke="#1e293b" stroke-width="0.8"/>
+      <polygon points="60,72 62,78 64,72" fill="#fff" stroke="#1e293b" stroke-width="0.8"/>
+      <!-- legs -->
+      <rect x="36" y="96" width="6" height="14" fill="#bfdbfe" stroke="#1e40af" stroke-width="1.5"/>
+      <rect x="78" y="96" width="6" height="14" fill="#bfdbfe" stroke="#1e40af" stroke-width="1.5"/>
+      <!-- snowflakes floating around -->
+      <text x="20" y="50" font-size="10" fill="#fff">❄</text>
+      <text x="92" y="80" font-size="10" fill="#fff">❄</text>
+      <text x="98" y="40" font-size="10" fill="#fff">❄</text>
+    </svg>
+  `,
 };
 
 // Helper: get any sprite as DOM/HTML string

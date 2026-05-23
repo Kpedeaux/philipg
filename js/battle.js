@@ -198,15 +198,21 @@ const Battle = (() => {
 
     // Damage spell — launch projectile, then apply damage when it lands
     Effects.castSpell(spell.id, playerEl, enemyEl, () => {
-      const bonus = petEffect('bonus');     // Storm Wolf: +8 to spells
-      const dmg = spell.damage + bonus + Math.floor(Math.random() * 6);
+      const bonus      = petEffect('bonus');     // Storm Wolf: +8 to spells
+      const critChance = petEffect('crit');      // Aurora Phoenix: chance to crit
+      let dmg = spell.damage + bonus + Math.floor(Math.random() * 6);
+      const isCrit = critChance > 0 && Math.random() * 100 < critChance;
+      if (isCrit) dmg *= 2;
       state.enemy.currentHp = Math.max(0, state.enemy.currentHp - dmg);
       Audio.enemyHit();
       enemyEl.classList.add('hit');
       setTimeout(() => enemyEl.classList.remove('hit'), 400);
-      floatText(`-${dmg}`, 'damage', getEnemyCenter());
-      const bonusNote = bonus > 0 ? ` (+${bonus} pet bonus)` : '';
-      flashFeedback('Hit!', `${spell.name} dealt ${dmg} damage${bonusNote}`, 'good');
+      floatText(`${isCrit ? '💥' : ''}-${dmg}`, 'damage', getEnemyCenter());
+      const parts = [];
+      if (bonus > 0) parts.push(`+${bonus} pet bonus`);
+      if (isCrit)    parts.push('CRITICAL HIT!');
+      const note = parts.length ? ` (${parts.join(', ')})` : '';
+      flashFeedback(isCrit ? '💥 CRIT!' : 'Hit!', `${spell.name} dealt ${dmg} damage${note}`, 'good');
       updateEnemyHp();
 
       // Pets that auto-attack each round
@@ -245,15 +251,21 @@ const Battle = (() => {
   function enemyAttack() {
     const playerEl = document.getElementById('battle-player-sprite');
     const enemyEl  = document.getElementById('enemy-sprite');
-    const base = state.enemy.dmg;
-    const dmg = base + Math.floor(Math.random() * 4);
+    const base   = state.enemy.dmg;
+    const shield = petEffect('shield');       // Crystal Fox: reduces incoming damage
+    const raw    = base + Math.floor(Math.random() * 4);
+    const dmg    = Math.max(1, raw - shield); // always do at least 1 damage so battles still progress
+    const blocked = raw - dmg;
 
     // Use full dramatic attack sequence (windup → lunge → slash → impact)
     Effects.enemyAttack(enemyEl, playerEl, () => {
       state.save.hp = Math.max(0, state.save.hp - dmg);
       Audio.hit();
       floatText(`-${dmg}`, 'damage', getPlayerCenter());
-      flashFeedback(`${state.enemy.name} attacks!`, `-${dmg} HP`, 'bad');
+      const sub = blocked > 0
+        ? `-${dmg} HP (${blocked} blocked by shield 🛡️)`
+        : `-${dmg} HP`;
+      flashFeedback(`${state.enemy.name} attacks!`, sub, 'bad');
       updatePlayerStats();
 
       // Defeat check must run AFTER HP is decremented (inside the callback)

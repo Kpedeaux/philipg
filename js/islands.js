@@ -102,9 +102,10 @@ const ISLANDS = [
     sprite: 'islandMath',
     bg: 'bgMathMountain',
     enemies: [
-      { id: 'a1', name: 'Shadow Cipher',  sprite: 'numberGolem',   hp: 90,  dmg: 18, pos: { x: 22, y: 50 } },
-      { id: 'a2', name: 'Equation Wraith', sprite: 'geometroBeast', hp: 110, dmg: 20, pos: { x: 78, y: 50 } },
-      { id: 'dark-atoll', name: '', sprite: '', boss: true, darkWizard: true, hp: 300, dmg: 30, pos: { x: 50, y: 25 } },
+      { id: 'a1', name: 'Shadow Cipher',   sprite: 'numberGolem',   hp: 90,  dmg: 18, pos: { x: 22, y: 55 } },
+      { id: 'a2', name: 'Equation Wraith', sprite: 'geometroBeast', hp: 110, dmg: 20, pos: { x: 78, y: 55 } },
+      { id: 'wp-atoll', name: 'Wild Crystal Fox', sprite: 'petCrystalFox', hp: 130, dmg: 19, wildPet: 'fox', pos: { x: 50, y: 80 } },
+      { id: 'dark-atoll', name: '', sprite: '', boss: true, darkWizard: true, requiresPet: 'fox', hp: 300, dmg: 30, pos: { x: 50, y: 22 } },
     ],
   },
   {
@@ -117,9 +118,10 @@ const ISLANDS = [
     sprite: 'islandReading',
     bg: 'bgReadingReef',
     enemies: [
-      { id: 'my1', name: 'Riddle Wraith', sprite: 'storyEel',   hp: 100, dmg: 19, pos: { x: 22, y: 50 } },
-      { id: 'my2', name: 'Plot Phantom',  sprite: 'bookKraken', hp: 125, dmg: 21, pos: { x: 78, y: 50 } },
-      { id: 'dark-mystery', name: '', sprite: '', boss: true, darkWizard: true, hp: 330, dmg: 32, pos: { x: 50, y: 25 } },
+      { id: 'my1', name: 'Riddle Wraith', sprite: 'storyEel',   hp: 100, dmg: 19, pos: { x: 22, y: 55 } },
+      { id: 'my2', name: 'Plot Phantom',  sprite: 'bookKraken', hp: 125, dmg: 21, pos: { x: 78, y: 55 } },
+      { id: 'wp-mystery', name: 'Wild Aurora Phoenix', sprite: 'petPhoenix', hp: 145, dmg: 21, wildPet: 'phoenix', pos: { x: 50, y: 80 } },
+      { id: 'dark-mystery', name: '', sprite: '', boss: true, darkWizard: true, requiresPet: 'phoenix', hp: 330, dmg: 32, pos: { x: 50, y: 22 } },
     ],
   },
   {
@@ -132,9 +134,10 @@ const ISLANDS = [
     sprite: 'islandSpelling',
     bg: 'bgSpellingSwamp',
     enemies: [
-      { id: 'st1', name: 'Cursed Quill',    sprite: 'letterImp',         hp: 115, dmg: 20, pos: { x: 22, y: 50 } },
-      { id: 'st2', name: 'Whispering Ghost',sprite: 'punctuationGhost',  hp: 140, dmg: 22, pos: { x: 78, y: 50 } },
-      { id: 'dark-sanctum', name: '', sprite: '', boss: true, darkWizard: true, hp: 360, dmg: 34, pos: { x: 50, y: 25 } },
+      { id: 'st1', name: 'Cursed Quill',     sprite: 'letterImp',         hp: 115, dmg: 20, pos: { x: 22, y: 55 } },
+      { id: 'st2', name: 'Whispering Ghost', sprite: 'punctuationGhost',  hp: 140, dmg: 22, pos: { x: 78, y: 55 } },
+      { id: 'wp-sanctum', name: 'Wild Spectral Cat', sprite: 'petSpectralCat', hp: 160, dmg: 23, wildPet: 'cat', pos: { x: 50, y: 80 } },
+      { id: 'dark-sanctum', name: '', sprite: '', boss: true, darkWizard: true, requiresPet: 'cat', hp: 360, dmg: 34, pos: { x: 50, y: 22 } },
     ],
   },
   {
@@ -147,9 +150,10 @@ const ISLANDS = [
     sprite: 'islandGrammar',
     bg: 'bgGrammarGrove',
     enemies: [
-      { id: 'w1', name: 'Phrase Phantom',  sprite: 'nounNymph',         hp: 130, dmg: 22, pos: { x: 22, y: 50 } },
-      { id: 'w2', name: 'Clause Beast',    sprite: 'verbVixen',         hp: 155, dmg: 24, pos: { x: 78, y: 50 } },
-      { id: 'dark-woods', name: '', sprite: '', boss: true, darkWizard: true, hp: 400, dmg: 36, pos: { x: 50, y: 25 } },
+      { id: 'w1', name: 'Phrase Phantom', sprite: 'nounNymph', hp: 130, dmg: 22, pos: { x: 22, y: 55 } },
+      { id: 'w2', name: 'Clause Beast',   sprite: 'verbVixen', hp: 155, dmg: 24, pos: { x: 78, y: 55 } },
+      { id: 'wp-woods', name: 'Wild Frost Wolf', sprite: 'petIceWolf', hp: 175, dmg: 25, wildPet: 'icewolf', pos: { x: 50, y: 80 } },
+      { id: 'dark-woods', name: '', sprite: '', boss: true, darkWizard: true, requiresPet: 'icewolf', hp: 400, dmg: 36, pos: { x: 50, y: 22 } },
     ],
   },
 ];
