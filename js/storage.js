@@ -21,6 +21,8 @@ function defaultSave(player) {
     spellsKnown: ['spark', 'fireball', 'heal'],
     pets: [],                       // pet ids owned (each unlocked by clearing a boss)
     playerPos: { x: 50, y: 50 },    // % position on world map
+    darkLocation: 'boss',           // where the dark wizard currently lives
+    darkDefeats: 0,                 // times the dark wizard has been beaten
     stats: { correct: 0, wrong: 0, battles: 0 },
     updatedAt: Date.now(),
   };

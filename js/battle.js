@@ -9,9 +9,13 @@ const Battle = (() => {
   let onResolve = null; // callback when battle ends
 
   function start({ save, enemy, island }, onEnd) {
+    // Resolve the dark wizard's sprite/name based on the active player
+    const resolved = (typeof resolveDarkWizard === 'function')
+      ? resolveDarkWizard(enemy, save)
+      : enemy;
     state = {
       save,
-      enemy: Object.assign({}, enemy, { currentHp: enemy.hp }),
+      enemy: Object.assign({}, resolved, { currentHp: resolved.hp }),
       island,
       busy: false,
       pendingSpell: null,
@@ -331,6 +335,22 @@ const Battle = (() => {
       }
     }
 
+    // Dark wizard defeated? Advance the chase and unlock the next tier-2 island.
+    let darkEscapedTo = null;
+    let gameTrulyComplete = false;
+    if (enemy.darkWizard) {
+      state.save.darkDefeats = (state.save.darkDefeats || 0) + 1;
+      const next = (typeof advanceDarkLocation === 'function')
+        ? advanceDarkLocation(state.save)
+        : null;
+      if (next) {
+        const nextIsland = ISLANDS.find(i => i.id === next);
+        if (nextIsland) darkEscapedTo = nextIsland;
+      } else {
+        gameTrulyComplete = true;
+      }
+    }
+
     // Island clear?
     const islandJustCleared = isIslandCleared(state.island, state.save)
       && !state.save.clearedIslands.includes(state.island.id);
@@ -353,8 +373,10 @@ const Battle = (() => {
           ? SPELLS.find(s => s.unlockedBy === state.island.subject)
           : null,
         petUnlocked,
+        darkEscapedTo,
+        gameTrulyComplete,
         enemy,
-        gameComplete: enemy.final,
+        gameComplete: gameTrulyComplete,
       });
     }, 1200);
   }

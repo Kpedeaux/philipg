@@ -234,6 +234,70 @@ const CHARACTERS = {
   `,
 
   // ============================================================
+  // Dark Owen — final boss when Philip is playing
+  // ============================================================
+  darkOwen: `
+    <svg viewBox="0 0 220 240" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <radialGradient id="darkOwenAura" cx="50%" cy="50%" r="60%">
+          <stop offset="0%" stop-color="#134e4a" stop-opacity="0.8"/>
+          <stop offset="100%" stop-color="#134e4a" stop-opacity="0"/>
+        </radialGradient>
+      </defs>
+      <!-- dark teal aura -->
+      <circle cx="110" cy="120" r="105" fill="url(#darkOwenAura)"/>
+
+      <!-- floating dark throne -->
+      <path d="M 50 130 L 60 200 L 160 200 L 170 130
+               Q 170 80, 110 70 Q 50 80, 50 130 Z"
+            fill="#0f172a" stroke="#000" stroke-width="3"/>
+      <path d="M 60 100 L 50 60 L 70 70 Z" fill="#134e4a" stroke="#0f172a" stroke-width="2"/>
+      <path d="M 160 100 L 170 60 L 150 70 Z" fill="#134e4a" stroke="#0f172a" stroke-width="2"/>
+
+      <!-- robe -->
+      <path d="M 75 160 Q 70 145, 80 130 L 140 130 Q 150 145, 145 160 L 155 195 L 65 195 Z"
+            fill="#7c2d12" stroke="#0f172a" stroke-width="2"/>
+      <text x="90" y="155" font-size="10" fill="#5eead4">☠</text>
+      <text x="115" y="160" font-size="10" fill="#5eead4">☠</text>
+
+      <!-- head -->
+      <ellipse cx="110" cy="120" rx="6" ry="4" fill="#d4a373"/>
+      <ellipse cx="110" cy="100" rx="26" ry="28" fill="#e9b894" stroke="#78350f" stroke-width="1.5"/>
+
+      <!-- hair: black, wild (Owen has darker hair, no glasses) -->
+      <path d="M 84 92 Q 80 60, 95 56 L 100 68 L 105 56 L 110 70 L 115 56 L 120 68 L 125 56
+               Q 140 60, 136 92 Q 130 84, 120 82 L 116 90 L 108 80 L 100 90 L 92 80 L 88 90 Z"
+            fill="#0f172a" stroke="#000" stroke-width="1.5"/>
+
+      <!-- glowing teal eyes (no glasses on Owen) -->
+      <circle cx="97" cy="100" r="5" fill="#0f172a"/>
+      <circle cx="97" cy="101" r="3" fill="#5eead4"/>
+      <circle cx="97" cy="101" r="1.5" fill="#fff"/>
+      <circle cx="123" cy="100" r="5" fill="#0f172a"/>
+      <circle cx="123" cy="101" r="3" fill="#5eead4"/>
+      <circle cx="123" cy="101" r="1.5" fill="#fff"/>
+
+      <!-- mouth (smirk) -->
+      <path d="M 100 116 Q 110 121, 122 114" fill="none" stroke="#7c2d12" stroke-width="2" stroke-linecap="round"/>
+
+      <!-- wizard hat (dark teal) -->
+      <path d="M 84 75 L 110 18 L 136 75 Z" fill="#134e4a" stroke="#042f2e" stroke-width="2"/>
+      <path d="M 78 75 Q 110 68, 142 75 L 142 82 Q 110 74, 78 82 Z" fill="#042f2e" stroke="#000" stroke-width="1.5"/>
+      <text x="98" y="55" font-size="14" fill="#5eead4">☠</text>
+
+      <!-- arms holding glowing teal wand -->
+      <path d="M 80 145 Q 55 135, 42 115" fill="none" stroke="#7c2d12" stroke-width="9" stroke-linecap="round"/>
+      <circle cx="40" cy="112" r="6" fill="#e9b894" stroke="#78350f" stroke-width="1"/>
+      <line x1="40" y1="112" x2="20" y2="82" stroke="#0f172a" stroke-width="4" stroke-linecap="round"/>
+      <polygon points="18,80 24,74 14,74" fill="#134e4a" stroke="#0f172a" stroke-width="1.5"/>
+      <circle cx="19" cy="77" r="4" fill="#5eead4" opacity="0.9"/>
+
+      <path d="M 140 145 Q 160 140, 168 130" fill="none" stroke="#7c2d12" stroke-width="9" stroke-linecap="round"/>
+      <circle cx="170" cy="128" r="6" fill="#e9b894" stroke="#78350f" stroke-width="1"/>
+    </svg>
+  `,
+
+  // ============================================================
   // Island enemies — themed creatures
   // ============================================================
 

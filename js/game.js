@@ -76,16 +76,15 @@ const Game = (() => {
     // Result continue
     document.getElementById('result-continue-btn').addEventListener('click', () => {
       Audio.click();
-      // Return to the island view (or map if final boss)
-      if (currentSave.clearedIslands.includes('boss')) {
+      // If the island is cleared or there's no current island, go back to the
+      // map so the player can see freshly-unlocked islands (e.g., where the
+      // dark wizard escaped to).
+      if (!currentIsland || isIslandCleared(currentIsland, currentSave)) {
         UI.showScreen('map');
         renderMap();
-      } else if (currentIsland) {
+      } else {
         UI.showScreen('island');
         renderIsland();
-      } else {
-        UI.showScreen('map');
-        renderMap();
       }
     });
 
@@ -187,7 +186,11 @@ const Game = (() => {
     const container = document.getElementById('island-enemies');
     container.innerHTML = '';
 
-    currentIsland.enemies.forEach(enemy => {
+    currentIsland.enemies.forEach(rawEnemy => {
+      // Resolve dark wizard sprite/name based on active player
+      const enemy = (typeof resolveDarkWizard === 'function')
+        ? resolveDarkWizard(rawEnemy, currentSave)
+        : rawEnemy;
       const defeated = currentSave.defeatedEnemies.includes(enemy.id);
       const locked   = isEnemyLocked(enemy, currentSave);
       const pos      = enemy.pos || { x: 50, y: 50 };
@@ -198,13 +201,15 @@ const Game = (() => {
       if (locked)   cls += ' locked';
       if (enemy.boss) cls += ' boss';
       if (enemy.wildPet) cls += ' wild-pet';
+      if (enemy.darkWizard) cls += ' dark-wizard';
       el.className = cls;
       el.dataset.enemyId = enemy.id;
       el.style.left = pos.x + '%';
       el.style.top  = pos.y + '%';
 
       let badge = '';
-      if (enemy.boss)     badge = ' 👑';
+      if (enemy.darkWizard) badge = ' 💀';
+      else if (enemy.boss)  badge = ' 👑';
       else if (enemy.wildPet) badge = ' 🌿';
 
       el.innerHTML = `
@@ -282,10 +287,15 @@ const Game = (() => {
     rewards.innerHTML = '';
 
     if (result.result === 'victory') {
-      title.textContent = result.gameComplete ? '🏆 You Win!' : 'Victory!';
-      msg.textContent = result.gameComplete
-        ? 'You defeated Dark Philip and saved the islands!'
-        : `You defeated ${result.enemy.name}!`;
+      const finalLine = result.gameTrulyComplete;
+      title.textContent = finalLine ? '🏆 You Win Forever!' : 'Victory!';
+      if (finalLine) {
+        msg.textContent = `You defeated ${result.enemy.name} for the final time and saved all the islands!`;
+      } else if (result.darkEscapedTo) {
+        msg.textContent = `You beat ${result.enemy.name}!`;
+      } else {
+        msg.textContent = `You defeated ${result.enemy.name}!`;
+      }
       const lines = [
         `+${result.rewards.xp} XP`,
         `+${result.rewards.mp} MP restored`,
@@ -294,6 +304,10 @@ const Game = (() => {
       if (result.islandCleared) lines.push(`🏝️ Island cleared!`);
       if (result.spellUnlocked) lines.push(`📖 New spell: ${result.spellUnlocked.icon} ${result.spellUnlocked.name}`);
       if (result.petUnlocked) lines.push(`🐾 New pet: ${result.petUnlocked.icon} ${result.petUnlocked.name} — ${result.petUnlocked.desc}`);
+      if (result.darkEscapedTo) {
+        lines.push(`💀 ${result.enemy.name} escaped to ${result.darkEscapedTo.name}!`);
+        lines.push(`🗺️ New island unlocked: ${result.darkEscapedTo.name}`);
+      }
       lines.forEach(l => {
         const div = document.createElement('div');
         div.className = 'reward-line';
