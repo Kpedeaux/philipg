@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#5b21b6" />
+  <meta name="description" content="PhilipG — a learning adventure for Philip and Owen." />
+  <title>PhilipG — Wizard of the Islands</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <div id="app" class="screen-host">
+
+    <!-- ===== Player Select ===== -->
+    <section id="screen-player-select" class="screen active" aria-hidden="false">
+      <div class="title-bg"></div>
+      <div class="title-wrap">
+        <h1 class="game-title">
+          <span class="title-philip">Philip</span><span class="title-g">G</span>
+        </h1>
+        <p class="subtitle">Wizard of the Islands</p>
+
+        <div class="player-cards">
+          <button class="player-card" data-player="philip" aria-label="Play as Philip, Grade 1">
+            <div class="player-avatar" id="avatar-philip-slot"></div>
+            <div class="player-name">Philip</div>
+            <div class="player-grade">1st Grade</div>
+            <div class="player-progress" data-progress-for="philip">New Game</div>
+          </button>
+          <button class="player-card" data-player="owen" aria-label="Play as Owen, Grade 4">
+            <div class="player-avatar" id="avatar-owen-slot"></div>
+            <div class="player-name">Owen</div>
+            <div class="player-grade">4th Grade</div>
+            <div class="player-progress" data-progress-for="owen">New Game</div>
+          </button>
+        </div>
+
+        <button class="ghost-btn" id="reset-progress-btn" aria-label="Reset progress">Reset Progress</button>
+      </div>
+    </section>
+
+    <!-- ===== World Map ===== -->
+    <section id="screen-map" class="screen" aria-hidden="true">
+      <header class="top-bar">
+        <button class="icon-btn" id="map-back-btn" aria-label="Back to player select">&#8592;</button>
+        <div class="hud">
+          <div class="hud-name" id="hud-player-name">Philip</div>
+          <div class="hud-stats">
+            <span class="stat hp"><span class="stat-icon">&#10084;</span><span id="hud-hp">100/100</span></span>
+            <span class="stat mp"><span class="stat-icon">&#9883;</span><span id="hud-mp">30/30</span></span>
+            <span class="stat lv"><span class="stat-icon">&#9733;</span>Lv <span id="hud-lv">1</span></span>
+          </div>
+        </div>
+        <button class="icon-btn" id="spellbook-btn" aria-label="Open spellbook">&#128214;</button>
+      </header>
+
+      <div class="map-canvas">
+        <div class="map-ocean" aria-hidden="true"></div>
+        <div class="map-islands" id="map-islands"></div>
+        <div class="map-tooltip" id="map-tooltip" hidden></div>
+      </div>
+
+      <div class="map-footer">
+        <p class="map-hint">Tap an island to set sail. Defeat all enemies to claim it!</p>
+      </div>
+    </section>
+
+    <!-- ===== Island View ===== -->
+    <section id="screen-island" class="screen" aria-hidden="true">
+      <header class="top-bar">
+        <button class="icon-btn" id="island-back-btn" aria-label="Back to map">&#8592;</button>
+        <div class="hud">
+          <div class="hud-name" id="island-name">Island</div>
+          <div class="hud-stats">
+            <span class="stat hp"><span class="stat-icon">&#10084;</span><span id="island-hp">100/100</span></span>
+            <span class="stat mp"><span class="stat-icon">&#9883;</span><span id="island-mp">30/30</span></span>
+          </div>
+        </div>
+        <button class="icon-btn" id="island-spellbook-btn" aria-label="Open spellbook">&#128214;</button>
+      </header>
+      <div class="island-bg" id="island-bg"></div>
+      <div class="island-enemies" id="island-enemies"></div>
+      <div class="map-footer">
+        <p class="map-hint" id="island-hint">Tap an enemy to battle!</p>
+      </div>
+    </section>
+
+    <!-- ===== Battle ===== -->
+    <section id="screen-battle" class="screen" aria-hidden="true">
+      <div class="battle-bg" id="battle-bg"></div>
+
+      <!-- Enemy -->
+      <div class="battle-enemy">
+        <div class="enemy-name" id="enemy-name">Enemy</div>
+        <div class="hp-bar"><div class="hp-fill" id="enemy-hp-fill"></div></div>
+        <div class="enemy-sprite" id="enemy-sprite"></div>
+      </div>
+
+      <!-- Player -->
+      <div class="battle-player">
+        <div class="player-sprite" id="battle-player-sprite"></div>
+        <div class="player-stats">
+          <div class="player-hpname"><span id="battle-player-name">Wizard</span></div>
+          <div class="hp-bar"><div class="hp-fill" id="player-hp-fill"></div></div>
+          <div class="hp-text"><span id="player-hp-text">100/100</span> HP</div>
+          <div class="mp-bar"><div class="mp-fill" id="player-mp-fill"></div></div>
+          <div class="mp-text"><span id="player-mp-text">30/30</span> MP</div>
+        </div>
+      </div>
+
+      <!-- Question / Spell Panel -->
+      <div class="battle-panel" id="battle-panel">
+        <div class="panel-stage stage-prompt active" id="stage-prompt">
+          <p class="panel-prompt">Choose a spell to cast!</p>
+          <div class="spell-grid" id="spell-grid"></div>
+          <button class="ghost-btn small" id="flee-btn">Flee</button>
+        </div>
+
+        <div class="panel-stage stage-question" id="stage-question">
+          <p class="question-subject" id="question-subject">Math</p>
+          <p class="question-text" id="question-text">Question goes here</p>
+          <div class="answer-grid" id="answer-grid"></div>
+        </div>
+
+        <div class="panel-stage stage-feedback" id="stage-feedback">
+          <p class="feedback-text" id="feedback-text">Correct!</p>
+          <p class="feedback-sub" id="feedback-sub">+25 damage</p>
+        </div>
+      </div>
+
+      <div class="floating-text-layer" id="floating-text-layer" aria-hidden="true"></div>
+    </section>
+
+    <!-- ===== Victory / Defeat ===== -->
+    <section id="screen-result" class="screen" aria-hidden="true">
+      <div class="result-wrap">
+        <h2 id="result-title">Victory!</h2>
+        <p id="result-message">You defeated the enemy!</p>
+        <div id="result-rewards" class="result-rewards"></div>
+        <button class="primary-btn" id="result-continue-btn">Continue</button>
+      </div>
+    </section>
+
+    <!-- ===== Spellbook Modal ===== -->
+    <div id="spellbook-modal" class="modal" hidden>
+      <div class="modal-content">
+        <header class="modal-header">
+          <h3>Spellbook</h3>
+          <button class="icon-btn" id="spellbook-close-btn" aria-label="Close">&times;</button>
+        </header>
+        <div id="spellbook-list" class="spellbook-list"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Game modules: load order matters -->
+  <script src="js/storage.js"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/characters.js"></script>
+  <script src="js/questions.js"></script>
+  <script src="js/spells.js"></script>
+  <script src="js/islands.js"></script>
+  <script src="js/battle.js"></script>
+  <script src="js/game.js"></script>
+</body>
+</html>
