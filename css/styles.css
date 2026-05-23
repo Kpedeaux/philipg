@@ -58,8 +58,16 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;   /* smooth iOS momentum */
   overscroll-behavior: contain;        /* don't bounce parent */
+  /* Respect device safe areas (iOS notch, Android nav bar) so nothing
+     gets hidden behind hardware UI on tablets and phones. */
+  padding-bottom: env(safe-area-inset-bottom, 0);
 }
 .screen.active { display: flex; }
+
+/* Inside any scrolling screen, every direct child should keep its natural size
+   instead of being compressed by flex layout. This is the universal fix for
+   "I can't see the bottom" on short viewports. */
+.screen > * { flex-shrink: 0; }
 
 /* =====================================================
    Player Select
@@ -372,10 +380,12 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 .island-bg svg { width: 100%; height: 100%; }
 .island-enemies {
   position: relative; z-index: 1;
-  flex: 1; display: flex;
+  flex: 0 0 auto;        /* don't shrink — let content overflow into screen's scroll */
+  display: flex;
   align-items: center; justify-content: center;
   gap: 24px; padding: 16px;
   flex-wrap: wrap;
+  min-height: 60vh;      /* take up reasonable space when there's room */
 }
 .island-enemy {
   background: rgba(0,0,0,0.4);
@@ -424,7 +434,7 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
   position: relative; z-index: 1;
   text-align: center;
   padding: 24px 16px 8px;
-  flex: 0 0 auto;
+  flex: 0 0 auto;       /* never shrink */
 }
 .enemy-name {
   color: var(--gold-light);
@@ -488,6 +498,7 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
   gap: 16px;
   padding: 8px 16px;
   flex-wrap: wrap;
+  flex: 0 0 auto;        /* never shrink — content can push panel past viewport */
 }
 
 /* Active pets sit beside the wizard during battle */
@@ -529,11 +540,12 @@ button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
   border-top: 4px solid var(--gold);
   padding: 16px;
   min-height: 200px;
-  flex: 1 1 auto;
+  /* CRITICAL: don't shrink. Content like 6 spells + question + 4 answers can
+     easily exceed remaining viewport space. flex-shrink: 0 forces the panel
+     to its natural content size, which makes the parent .screen scroll. */
+  flex: 0 0 auto;
   display: flex;
   flex-direction: column;
-  /* On short screens, the panel itself becomes a scroll container so spells/answers
-     are always reachable without losing the enemy/player sprites at the top. */
   max-height: none;
 }
 .panel-stage { display: none; flex-direction: column; gap: 12px; flex: 1; }
